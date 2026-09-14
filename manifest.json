@@ -1,6 +1,7 @@
 {
   "short_name": "GameVault",
   "name": "GameVault — Gaming Dashboard & Library",
+  "id": "./",
   "description": "Personal gaming management dashboard and library manager to track games, playtime, goals, and statistics.",
   "icons": [
     {
@@ -16,5 +17,14 @@
   "orientation": "portrait-primary",
   "theme_color": "#0b0f17",
   "background_color": "#07090e",
-  "categories": ["games", "entertainment", "productivity"]
+  "categories": ["games", "entertainment", "productivity"],
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "./manifest.json",
+      "id": "./"
+    }
+  ],
+  "prefer_related_applications": false
 }
+
