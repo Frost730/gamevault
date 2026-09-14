@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('gamingDashboard_settings');
+          var theme = 'dark';
+          if (saved) {
+            var parsed = JSON.parse(saved);
+            if (parsed && parsed.theme) {
+              theme = parsed.theme;
+            }
+          }
+          var root = document.documentElement;
+          if (theme === 'light') {
+            root.classList.remove('dark');
+            root.classList.add('light');
+            root.style.colorScheme = 'light';
+          } else {
+            root.classList.add('dark');
+            root.classList.remove('light');
+            root.style.colorScheme = 'dark';
+          }
+        } catch (e) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
+    <link rel="apple-touch-icon" href="./icon.svg" />
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="theme-color" content="#0b0f17" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="GameVault" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+    <title>GameVault — Ultimate Gaming Library & Dashboard</title>
+    <meta name="description" content="Personal gaming management dashboard and library manager to track games, playtime, goals, and statistics." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="./assets/index-Ikv3eH5F.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/vendor-react-CqcIjhZ6.js">
+    <link rel="modulepreload" crossorigin href="./assets/vendor-charts-iAfeVMb2.js">
+    <link rel="modulepreload" crossorigin href="./assets/vendor-icons-BFBzSca8.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-DI-goMy1.css">
+  </head>
+  <body class="bg-slate-50 dark:bg-dark-950 text-slate-900 dark:text-slate-100 min-h-screen antialiased selection:bg-brand-500 selection:text-white">
+    <div id="root"></div>
+  </body>
+</html>
