@@ -3,19 +3,24 @@
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#0f172a" />
       <stop offset="50%" stop-color="#0b0f17" />
-      <stop offset="100%" stop-color="#06090e" />
+      <stop offset="100%" stop-color="#07090e" />
     </linearGradient>
     <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#8b5cf6" />
       <stop offset="100%" stop-color="#06b6d4" />
     </linearGradient>
+    <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0" />
+    </radialGradient>
   </defs>
 
-  <!-- Full Bleed Background for Android Adaptive Mask -->
+  <!-- 100% Full-bleed Square Background - solid to all 4 corners, no transparency -->
   <rect width="512" height="512" fill="url(#bgGrad)" />
+  <circle cx="256" cy="256" r="220" fill="url(#centerGlow)" />
 
-  <!-- Centered Gamepad Group (scaled 0.76 to safely fit inside 80% circular mask) -->
-  <g transform="translate(256, 256) scale(0.76) translate(-256, -284)">
+  <!-- Centered Gamepad Controller -->
+  <g transform="translate(256, 256) scale(0.80) translate(-256, -284)">
     <path d="M352 144H160C106.98 144 64 186.98 64 240c0 43.83 29.35 80.82 69.58 92.54l36.88 73.76C176.71 418.8 190.28 424 204.09 424c16.32 0 31.63-7.79 41.22-21.01L272 368h80c53.02 0 96-42.98 96-96s-42.98-128-96-128z" 
           fill="url(#glow)" fill-opacity="0.18" stroke="url(#glow)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
     <path d="M192 232v48M168 256h48" stroke="#f8fafc" stroke-width="18" stroke-linecap="round"/>
