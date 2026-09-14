@@ -1,12 +1,15 @@
-const CACHE_NAME = 'gamevault-cache-v4';
+const CACHE_NAME = 'gamevault-cache-v5';
 
 const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon.svg',
+  './icon-maskable.svg',
   './pwa-icon-192.png',
   './pwa-icon-512.png',
+  './pwa-icon-maskable-192.png',
+  './pwa-icon-maskable-512.png',
   './apple-touch-icon.png',
   './favicon-32.png'
 ];
