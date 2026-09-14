@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gamevault-cache-v1';
+const CACHE_NAME = 'gamevault-cache-v2';
 
 const STATIC_ASSETS = [
   './',

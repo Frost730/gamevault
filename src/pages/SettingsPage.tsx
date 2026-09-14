@@ -50,7 +50,7 @@ export const SettingsPage: React.FC = () => {
   });
 
   useEffect(() => {
-    const checkInstalled = () => {
+    const checkInstalled = async () => {
       const isStandalone =
         window.matchMedia('(display-mode: standalone)').matches ||
         (window.navigator as any).standalone === true ||
@@ -58,6 +58,19 @@ export const SettingsPage: React.FC = () => {
       const stored = localStorage.getItem('gamevault_pwa_installed') === 'true';
       if (isStandalone || stored) {
         setIsInstalled(true);
+      }
+
+      // Check modern Chromium getInstalledRelatedApps API
+      if ('getInstalledRelatedApps' in navigator) {
+        try {
+          const relatedApps = await (navigator as any).getInstalledRelatedApps();
+          if (Array.isArray(relatedApps) && relatedApps.length > 0) {
+            setIsInstalled(true);
+            localStorage.setItem('gamevault_pwa_installed', 'true');
+          }
+        } catch {
+          // Ignore
+        }
       }
     };
     checkInstalled();
@@ -265,21 +278,50 @@ export const SettingsPage: React.FC = () => {
           GameVault operates as an offline-first Progressive Web App. You can install it on your PC or mobile home screen to run in a dedicated borderless window with instant offline loading.
         </p>
 
-        <div className="pt-1">
+        <div className="flex flex-wrap items-center gap-3 pt-1">
           {isInstalled ? (
-            <div className="inline-flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-2.5 rounded-xl">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-              <span>GameVault is installed on this device</span>
-            </div>
+            <>
+              <div className="inline-flex items-center gap-2.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold bg-emerald-500/10 border border-emerald-500/25 px-4 py-2.5 rounded-xl select-none pointer-events-none cursor-default">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                <span>GameVault is installed on this device</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  localStorage.removeItem('gamevault_pwa_installed');
+                  setIsInstalled(
+                    window.matchMedia('(display-mode: standalone)').matches ||
+                    (window.navigator as any).standalone === true
+                  );
+                  showNotify('success', 'Installation status reset.');
+                }}
+                className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline underline-offset-2 transition-colors cursor-pointer"
+              >
+                Recheck / Reset
+              </button>
+            </>
           ) : (
-            <button
-              type="button"
-              onClick={handleInstallPWA}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-700 dark:text-accent-cyan border border-cyan-500/30 text-xs font-semibold transition-all active:scale-95 shadow-sm"
-            >
-              <Smartphone className="w-4 h-4" />
-              <span>Install GameVault App</span>
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={handleInstallPWA}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-700 dark:text-accent-cyan border border-cyan-500/30 text-xs font-semibold transition-all active:scale-95 shadow-sm cursor-pointer"
+              >
+                <Smartphone className="w-4 h-4" />
+                <span>Install GameVault App</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsInstalled(true);
+                  localStorage.setItem('gamevault_pwa_installed', 'true');
+                  showNotify('success', 'Marked as installed!');
+                }}
+                className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline underline-offset-2 transition-colors cursor-pointer"
+              >
+                Already installed?
+              </button>
+            </>
           )}
         </div>
       </div>
