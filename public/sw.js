@@ -1,10 +1,14 @@
-const CACHE_NAME = 'gamevault-cache-v3';
+const CACHE_NAME = 'gamevault-cache-v4';
 
 const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg'
+  './icon.svg',
+  './pwa-icon-192.png',
+  './pwa-icon-512.png',
+  './apple-touch-icon.png',
+  './favicon-32.png'
 ];
 
 // Install Event: cache static shell assets
