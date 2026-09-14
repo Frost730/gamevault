@@ -8,6 +8,7 @@ import { GameFormModal } from '../games/GameFormModal';
 import { GameDetailsModal } from '../games/GameDetailsModal';
 import { GoalFormModal } from '../goals/GoalFormModal';
 import { MobileBottomNav } from './MobileBottomNav';
+import { PWAInstallPopup } from '../common/PWAInstallPopup';
 import { X } from 'lucide-react';
 
 export const Layout: React.FC = () => {
@@ -146,6 +147,9 @@ export const Layout: React.FC = () => {
         onDelete={(id) => deleteGoal(id)}
         initialGoal={editingGoal}
       />
+
+      {/* Global Browser Download / Install PWA Popup */}
+      <PWAInstallPopup />
     </div>
   );
 };

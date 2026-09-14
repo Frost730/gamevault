@@ -6,6 +6,7 @@ import { storageService } from '../services/storageService';
 import { notificationService } from '../services/notificationService';
 import { downloadJsonFile, parseBackupFile } from '../utils/exportImport';
 import { ExportDataPayload } from '../types';
+import { usePWA } from '../context/PWAContext';
 import { ConfirmDialog } from '../components/common/ConfirmDialog';
 import {
   Download,
@@ -27,6 +28,7 @@ export const SettingsPage: React.FC = () => {
   const { games, refreshGames, clearAllGames } = useGames();
   const { goals, refreshGoals } = useGoals();
   const { theme, setTheme } = useTheme();
+  const { isInstalled, promptInstall, resetInstallStatus, markAsInstalled, isIos } = usePWA();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -34,67 +36,10 @@ export const SettingsPage: React.FC = () => {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [pendingImportPayload, setPendingImportPayload] = useState<ExportDataPayload | null>(null);
 
-  // Notification & PWA states
+  // Notification state
   const [permission, setPermission] = useState<NotificationPermission>(() => {
     return notificationService.getPermission();
   });
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isInstalled, setIsInstalled] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    const isStandalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      (window.navigator as any).standalone === true ||
-      document.referrer.includes('android-app://');
-    const stored = localStorage.getItem('gamevault_pwa_installed') === 'true';
-    return isStandalone || stored;
-  });
-
-  useEffect(() => {
-    const checkInstalled = async () => {
-      const isStandalone =
-        window.matchMedia('(display-mode: standalone)').matches ||
-        (window.navigator as any).standalone === true ||
-        document.referrer.includes('android-app://');
-      const stored = localStorage.getItem('gamevault_pwa_installed') === 'true';
-      if (isStandalone || stored) {
-        setIsInstalled(true);
-      }
-
-      // Check modern Chromium getInstalledRelatedApps API
-      if ('getInstalledRelatedApps' in navigator) {
-        try {
-          const relatedApps = await (navigator as any).getInstalledRelatedApps();
-          if (Array.isArray(relatedApps) && relatedApps.length > 0) {
-            setIsInstalled(true);
-            localStorage.setItem('gamevault_pwa_installed', 'true');
-          }
-        } catch {
-          // Ignore
-        }
-      }
-    };
-    checkInstalled();
-
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-
-    const handleAppInstalled = () => {
-      setIsInstalled(true);
-      localStorage.setItem('gamevault_pwa_installed', 'true');
-      setDeferredPrompt(null);
-      showNotify('success', 'Thank you for installing GameVault!');
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleAppInstalled);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
-    };
-  }, []);
 
   const showNotify = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message });
@@ -115,23 +60,16 @@ export const SettingsPage: React.FC = () => {
   };
 
   const handleInstallPWA = async () => {
-    if (!deferredPrompt) {
-      const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-      if (isIos) {
-        showNotify('success', 'To install on iOS: tap the Share button and select "Add to Home Screen".');
-      } else {
-        showNotify('success', 'To install: open your browser menu (⋮) and select "Install App" or "Add to Home screen".');
-      }
+    if (isIos) {
+      showNotify('success', 'To install on iOS: tap the Share button in Safari and select "Add to Home Screen".');
       return;
     }
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setIsInstalled(true);
-      localStorage.setItem('gamevault_pwa_installed', 'true');
+    const success = await promptInstall();
+    if (success) {
       showNotify('success', 'Thank you for installing GameVault!');
+    } else {
+      showNotify('success', 'To install: open your browser menu (⋮) and select "Install GameVault" or "Add to Home screen".');
     }
-    setDeferredPrompt(null);
   };
 
   // Export
@@ -288,11 +226,7 @@ export const SettingsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  localStorage.removeItem('gamevault_pwa_installed');
-                  setIsInstalled(
-                    window.matchMedia('(display-mode: standalone)').matches ||
-                    (window.navigator as any).standalone === true
-                  );
+                  resetInstallStatus();
                   showNotify('success', 'Installation status reset.');
                 }}
                 className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline underline-offset-2 transition-colors cursor-pointer"
@@ -313,8 +247,7 @@ export const SettingsPage: React.FC = () => {
               <button
                 type="button"
                 onClick={() => {
-                  setIsInstalled(true);
-                  localStorage.setItem('gamevault_pwa_installed', 'true');
+                  markAsInstalled();
                   showNotify('success', 'Marked as installed!');
                 }}
                 className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 underline underline-offset-2 transition-colors cursor-pointer"

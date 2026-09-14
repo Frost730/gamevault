@@ -3,6 +3,7 @@ import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { GameProvider } from './context/GameContext';
 import { GoalProvider } from './context/GoalContext';
+import { PWAProvider } from './context/PWAContext';
 import { Layout } from './components/layout/Layout';
 import { DashboardPage } from './pages/DashboardPage';
 import { LibraryPage } from './pages/LibraryPage';
@@ -16,7 +17,8 @@ export const App: React.FC = () => {
     <ThemeProvider>
       <GameProvider>
         <GoalProvider>
-          <HashRouter>
+          <PWAProvider>
+            <HashRouter>
             <Routes>
               <Route path="/" element={<Layout />}>
                 <Route index element={<DashboardPage />} />
@@ -72,10 +74,11 @@ export const App: React.FC = () => {
               </Route>
             </Routes>
           </HashRouter>
-        </GoalProvider>
-      </GameProvider>
-    </ThemeProvider>
-  );
+        </PWAProvider>
+      </GoalProvider>
+    </GameProvider>
+  </ThemeProvider>
+);
 };
 
 export default App;
