@@ -39,21 +39,48 @@ export const SettingsPage: React.FC = () => {
     return notificationService.getPermission();
   });
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [isInstalled, setIsInstalled] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      (window.navigator as any).standalone === true ||
+      document.referrer.includes('android-app://');
+    const stored = localStorage.getItem('gamevault_pwa_installed') === 'true';
+    return isStandalone || stored;
+  });
 
   useEffect(() => {
-    // Check if installed or running standalone PWA
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true);
-    }
+    const checkInstalled = () => {
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true ||
+        document.referrer.includes('android-app://');
+      const stored = localStorage.getItem('gamevault_pwa_installed') === 'true';
+      if (isStandalone || stored) {
+        setIsInstalled(true);
+      }
+    };
+    checkInstalled();
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e);
     };
 
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      localStorage.setItem('gamevault_pwa_installed', 'true');
+      setDeferredPrompt(null);
+      showNotify('success', 'Thank you for installing GameVault!');
+    };
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
   }, []);
 
   const showNotify = (type: 'success' | 'error', message: string) => {
@@ -76,13 +103,19 @@ export const SettingsPage: React.FC = () => {
 
   const handleInstallPWA = async () => {
     if (!deferredPrompt) {
-      showNotify('success', 'To install: use your browser menu and select "Install App" or "Add to Home Screen".');
+      const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      if (isIos) {
+        showNotify('success', 'To install on iOS: tap the Share button and select "Add to Home Screen".');
+      } else {
+        showNotify('success', 'To install: open your browser menu (⋮) and select "Install App" or "Add to Home screen".');
+      }
       return;
     }
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
       setIsInstalled(true);
+      localStorage.setItem('gamevault_pwa_installed', 'true');
       showNotify('success', 'Thank you for installing GameVault!');
     }
     setDeferredPrompt(null);
@@ -217,7 +250,13 @@ export const SettingsPage: React.FC = () => {
               Progressive Web App (PWA)
             </h3>
           </div>
-          <span className="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-cyan-500/15 text-cyan-700 dark:text-accent-cyan border border-cyan-500/30">
+          <span
+            className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${
+              isInstalled
+                ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                : 'bg-cyan-500/15 text-cyan-700 dark:text-accent-cyan border border-cyan-500/30'
+            }`}
+          >
             {isInstalled ? 'Installed' : 'Ready to Install'}
           </span>
         </div>
@@ -227,14 +266,21 @@ export const SettingsPage: React.FC = () => {
         </p>
 
         <div className="pt-1">
-          <button
-            type="button"
-            onClick={handleInstallPWA}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-700 dark:text-accent-cyan border border-cyan-500/30 text-xs font-semibold transition-all active:scale-95 shadow-sm"
-          >
-            <Smartphone className="w-4 h-4" />
-            <span>{isInstalled ? 'App Installed (Launch Standalone)' : 'Install GameVault App'}</span>
-          </button>
+          {isInstalled ? (
+            <div className="inline-flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-500/10 border border-emerald-500/20 px-3.5 py-2.5 rounded-xl">
+              <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+              <span>GameVault is installed on this device</span>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleInstallPWA}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-700 dark:text-accent-cyan border border-cyan-500/30 text-xs font-semibold transition-all active:scale-95 shadow-sm"
+            >
+              <Smartphone className="w-4 h-4" />
+              <span>Install GameVault App</span>
+            </button>
+          )}
         </div>
       </div>
 
