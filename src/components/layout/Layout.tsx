@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
 import { useGames } from '../../context/GameContext';
@@ -12,6 +12,32 @@ import { X } from 'lucide-react';
 
 export const Layout: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    const titles: Record<string, string> = {
+      '/': 'Dashboard',
+      '/library': 'My Library',
+      '/playing': 'Currently Playing',
+      '/completed': 'Completed',
+      '/backlog': 'Backlog',
+      '/wishlist': 'Wishlist',
+      '/statistics': 'Statistics',
+      '/goals': 'Goals',
+      '/settings': 'Settings',
+    };
+    const current = titles[location.pathname] || 'Dashboard';
+    const isStandalone =
+      typeof window !== 'undefined' &&
+      (window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true);
+
+    if (isStandalone) {
+      document.title = current === 'Dashboard' ? 'GameVault' : current;
+    } else {
+      document.title = current === 'Dashboard' ? 'GameVault' : `${current} — GameVault`;
+    }
+  }, [location.pathname]);
 
   const {
     selectedGame,
